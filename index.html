@@ -2,115 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" 
-        content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
-  <title>pmary-r</title>
-  <!-- IBM Plex Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1.0">
   <style>
-    /* base reset */
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { height:100%; overflow:hidden; background:#000; color:#ddd; 
-                 font-family:'IBM Plex Mono',monospace; -webkit-text-size-adjust:none; }
-    body { display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
-    
-    img { max-width:90%; height:auto; }
-
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      color: #ddd;
+      -webkit-text-size-adjust: none;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    img {
+      max-width: 90%;
+      height: auto;
+    }
     a code {
-      display:block;
-      margin-top:1rem;
-      font-family:'IBM Plex Mono',monospace;
-      font-size:1rem;
-      color:#ddd;
-      text-decoration:none;
-      cursor:pointer;
+      display: block;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 1rem;
+      color: #ddd;
     }
-
-    /* footer */
     .footer {
-      position:absolute;
-      bottom:0.5rem; right:1rem;
-      font-size:0.6rem; color:#888;
-      font-family:'IBM Plex Mono',monospace;
+      position: absolute;
+      bottom: 0.5rem;
+      right: 1rem;
+      font-size: 0.6rem;
+      color: #888;
     }
 
-    /* overlay + spinner */
-    #overlay {
-      display:none;
-      position:fixed; top:0; left:0;
-      width:100%; height:100%;
-      background:#fff;
-      justify-content:center; align-items:center;
-      z-index:9999;
+    /* Keyframes for two intensity levels */
+    @keyframes pulse1 {
+      0%,100% { transform: scale(1); }
+      50%    { transform: scale(1.05); }
     }
-    #spinner {
-      width:40px; height:40px;
-      border:4px solid #ddd;
-      border-top-color:#999;
-      border-radius:50%;
+    @keyframes pulse2 {
+      0%,100% { transform: scale(1); }
+      50%    { transform: scale(1.1); }
     }
-    /* spin keyframes */
-    @keyframes spin {
-      from { transform:rotate(0deg); }
-      to   { transform:rotate(360deg); }
+    @keyframes bgFlash1 {
+      0%,100% { background-color: #000; }
+      50%     { background-color: #111; }
     }
-    /* add this class when you want to start */
-    .spin {
-      animation: spin 2s ease-in 3;
-      animation-fill-mode:forwards;
+    @keyframes bgFlash2 {
+      0%,100% { background-color: #000; }
+      50%     { background-color: #222; }
+    }
+
+    /* Apply on each cycle */
+    body.cycle-1 {
+      animation: bgFlash1 2s ease-in-out;
+    }
+    body.cycle-1 img {
+      animation: pulse1 2s ease-in-out;
+    }
+    body.cycle-2 {
+      animation: bgFlash2 2s ease-in-out;
+    }
+    body.cycle-2 img {
+      animation: pulse2 2s ease-in-out;
     }
   </style>
 </head>
 <body>
-
-  <!-- main content -->
   <img src="pmary-r.png" alt="pmary-r">
-  <a id="link" href="https://open.spotify.com/artist/3ETkK2Yiu2QbiFei128MyN?si=Tx1CLP43Q5S9yF0novgaXQ">
+  <a href="https://open.spotify.com/artist/3ETkK2Yiu2QbiFei128MyN?si=-TX7OhlYRPqU2R3w4tv0Fw">
     <code>pmary-r</code>
   </a>
-  <div class="footer">Joel Gatfield – joelgat360@outlook.com</div>
-
-  <!-- overlay + spinner -->
-  <div id="overlay">
-    <div id="spinner"></div>
+  <div class="footer">
+    Joel Gatfield – joelgat360@outlook.com
   </div>
 
-  <!-- audio -->
-  <audio id="audio" src="cycle-sound.mp3" preload="auto"></audio>
-
   <script>
-    const link      = document.getElementById('link');
-    const overlay   = document.getElementById('overlay');
-    const spinner   = document.getElementById('spinner');
-    const audio     = document.getElementById('audio');
-    const volumes   = [0.3, 0.6, 1.0];
-    let   cycle     = 0;
+    // list your two audio files here (place in same folder)
+    const audioFiles = ['audio1.mp3', 'audio2.mp3'];
+    let idx = 0;
 
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      // show overlay + start spinner
-      overlay.style.display = 'flex';
-      spinner.classList.add('spin');
-      // play first cycle sound
-      cycle = 1;
-      audio.volume   = volumes[0];
-      audio.currentTime = 0;
-      audio.play();
-    });
+    function runCycle() {
+      if (idx >= audioFiles.length) return;
+      const cls = 'cycle-' + (idx + 1);
+      document.body.classList.add(cls);
 
-    spinner.addEventListener('animationiteration', () => {
-      cycle++;
-      if (cycle <= 3) {
-        audio.volume     = volumes[cycle-1] || 1.0;
-        audio.currentTime= 0;
-        audio.play();
-      }
-    });
+      const a = new Audio(audioFiles[idx]);
+      a.play();
+      a.onended = () => {
+        document.body.classList.remove(cls);
+        idx++;
+        runCycle();
+      };
+    }
 
-    spinner.addEventListener('animationend', () => {
-      // all 3 cycles done → redirect
-      window.location.href = link.href;
-    });
+    window.addEventListener('load', runCycle);
   </script>
 </body>
 </html>
